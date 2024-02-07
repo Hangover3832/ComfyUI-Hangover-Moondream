@@ -31,6 +31,7 @@ class Moondream:
                 "prompt": ("STRING", {"multiline": False, "default": "Please provide a detailed description of this image."},),
                 "huggingface_model": (s.HUGGINGFACE_MODEL_NAMES, {"default": s.HUGGINGFACE_MODEL_NAMES[0]},),
                 "device": (s.DEVICES, {"default": s.DEVICES[0]},),
+                "trust_remote_code": ("BOOLEAN", {"default": False},),
             }
         }
 
@@ -40,7 +41,7 @@ class Moondream:
     OUTPUT_NODE = False
     CATEGORY = "Hangover"
 
-    def interrogate(self, image:torch.Tensor, prompt:str, huggingface_model:str, device:str):
+    def interrogate(self, image:torch.Tensor, prompt:str, huggingface_model:str, device:str, trust_remote_code:bool):
         dev = "cuda" if device.lower() == "gpu" else "cpu"
         if (self.model == None) or (self.tokenizer == None) or (self.modelname != huggingface_model) or (device != self.device):
             del self.model
@@ -48,8 +49,17 @@ class Moondream:
             gc.collect()
             if (device == "cpu") and torch.cuda.is_available():
                 torch.cuda.empty_cache()
+            self.model = None
+            self.tokenizer = None
             print(f"moondream: loading model {huggingface_model}, please stand by....")
-            self.model = AutoModelForCausalLM.from_pretrained(huggingface_model, trust_remote_code=False).to(dev)
+            try:
+                self.model = AutoModelForCausalLM.from_pretrained(huggingface_model, trust_remote_code=trust_remote_code).to(dev)
+            except ValueError:
+                self.model = None
+                self.tokenizer = None
+                print("Moondream: You have to trust remote code to use this node!")
+                return ("You have to trust remote code execution to use this node!",)
+            
             self.tokenizer = Tokenizer.from_pretrained(huggingface_model)
             self.modelname = huggingface_model
             self.device = device
