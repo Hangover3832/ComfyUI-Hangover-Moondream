@@ -55,8 +55,6 @@ class Moondream:
             try:
                 self.model = AutoModelForCausalLM.from_pretrained(huggingface_model, trust_remote_code=trust_remote_code).to(dev)
             except ValueError:
-                self.model = None
-                self.tokenizer = None
                 print("Moondream: You have to trust remote code to use this node!")
                 return ("You have to trust remote code execution to use this node!",)
             
