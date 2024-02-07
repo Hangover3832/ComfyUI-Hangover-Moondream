@@ -49,7 +49,7 @@ class Moondream:
             if (device == "cpu") and torch.cuda.is_available():
                 torch.cuda.empty_cache()
             print(f"moondream: loading model {huggingface_model}, please stand by....")
-            self.model = AutoModelForCausalLM.from_pretrained(huggingface_model, trust_remote_code=True).to(dev)
+            self.model = AutoModelForCausalLM.from_pretrained(huggingface_model, trust_remote_code=False).to(dev)
             self.tokenizer = Tokenizer.from_pretrained(huggingface_model)
             self.modelname = huggingface_model
             self.device = device
