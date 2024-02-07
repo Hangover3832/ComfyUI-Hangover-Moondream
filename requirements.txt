@@ -1,0 +1,4 @@
+PIL
+transformers>=4.36.0
+numpy
+torch
