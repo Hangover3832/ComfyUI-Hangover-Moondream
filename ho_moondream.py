@@ -68,7 +68,7 @@ class Moondream:
             i = 255. * im.cpu().numpy()
             img = Image.fromarray(np.clip(i, 0, 255).astype(np.uint8))
             enc_image = self.model.encode_image(img)
-            answer = self.model.answer_question(enc_image, "What is this?", self.tokenizer)
+            answer = self.model.answer_question(enc_image, prompt, self.tokenizer)
             descriptions += answer
         
         return(descriptions,)
