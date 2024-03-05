@@ -15,7 +15,7 @@ import gc
 import numpy as np
 
 class Moondream:
-    HUGGINGFACE_MODEL_NAMES = ["vikhyatk/moondream1",] # other/newer models can be added here
+    HUGGINGFACE_MODEL_NAMES = ["vikhyatk/moondream2", "vikhyatk/moondream1",] # other/newer models can be added here
     DEVICES = ["cpu", "gpu"] if torch.cuda.is_available() else  ["cpu"]
 
     def __init__(self):
