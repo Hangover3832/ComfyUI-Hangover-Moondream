@@ -17,7 +17,7 @@
 ## Custom model path
 
 There is an input field to specify a custom model path. Leave this field empty for automatic model and code version management 'the huggingface way'. The files are then stored in a folder named '.cache' in the users home directory.
-If you specify this path, the model and all additional corresponding filed are then expected to be in that folder. Type in "./ComfyUI/models/moondream2" if the files are located in the ComfyUI/models/moondream2 folder. This way, you can do
+If you specify this path, the model and all additional corresponding files are then expected to be in that folder. Type in "./ComfyUI/models/moondream2" if the files are located in the ComfyUI/models/moondream2 folder. This way, you can do
 
 ``git clone https://huggingface.co/vikhyatk/moondream2/tree/main``
 
