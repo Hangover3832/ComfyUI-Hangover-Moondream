@@ -42,10 +42,10 @@ class Moondream:
     OUTPUT_NODE = False
     CATEGORY = "Hangover"
 
-    def interrogate(self, image:torch.Tensor, prompt:str, huggingface_model:str, custom_path:str, device:str, trust_remote_code:bool):
+    def interrogate(self, image:torch.Tensor, prompt:str, huggingface_model:str, custom_model_path:str, device:str, trust_remote_code:bool):
         dev = "cuda" if device.lower() == "gpu" else "cpu"
-        if custom_path != "":
-            huggingface_model = custom_path
+        if custom_model_path != "":
+            huggingface_model = custom_model_path
         if (self.model == None) or (self.tokenizer == None) or (self.modelname != huggingface_model) or (device != self.device):
             del self.model
             del self.tokenizer
