@@ -4,5 +4,5 @@ from .ho_moondream import Moondream
 # NOTE: names should be globally unique
 
 NODE_CLASS_MAPPINGS = {
-    "Moondream Interrogator (NO COMMERCIAL USE)": Moondream,
+    "Moondream Interrogator": Moondream,
 }
