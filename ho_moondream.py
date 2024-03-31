@@ -1,11 +1,12 @@
-'''
-An implementation of the moondream visual LLM
-https://huggingface.co/vikhyatk/moondream1
+"""
+@author: AlexL
+@title: ComfyUI-Hangover-Moondream
+@nickname: Hangover-Moondream
+@description: An implementation of the moondream visual LLM
+"""
+# https://huggingface.co/vikhyatk/moondream2
 
-https://github.com/Hangover3832
-
-Alex
-'''
+# by https://github.com/Hangover3832
 
 
 from transformers import AutoModelForCausalLM, CodeGenTokenizerFast as Tokenizer
