@@ -67,19 +67,20 @@ class Moondream:
             self.device = device
 
         descriptions = ""
-        # prompts = [s.strip for s in list(filter(lambda x: x!="", prompt.splitlines()))] 
         prompts = list(filter(lambda x: x!="", [s.lstrip() for s in prompt.splitlines()])) # make a prompt list and remove unnecessary whitechars and empty lines
+        if len(prompts) == 0:
+            prompts = [""]
         
         for im in image:
             i = 255. * im.cpu().numpy()
             img = Image.fromarray(np.clip(i, 0, 255).astype(np.uint8))
             enc_image = self.model.encode_image(img)
             descr = ""
+            sep = codecs.decode(separator, 'unicode_escape')
             for p in prompts:
                 answer = self.model.answer_question(enc_image, p, self.tokenizer)
-                sep = codecs.decode(separator, 'unicode_escape')
                 descr += f"{answer}{sep}"
             descriptions += f"{descr[0:-len(sep)]}\n"
         
-        # return(descriptions[0:-1],)
-        return(descriptions,)
+        return(descriptions[0:-1],)
+        # return(descriptions,)
