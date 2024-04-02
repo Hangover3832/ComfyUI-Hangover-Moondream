@@ -14,6 +14,7 @@ from PIL import Image
 import torch
 import gc
 import numpy as np
+import codecs
 
 class Moondream:
     HUGGINGFACE_MODEL_NAMES = ["vikhyatk/moondream2",] # other/newer models can be added here
@@ -29,7 +30,8 @@ class Moondream:
         return {
             "required": {
                 "image": ("IMAGE",),
-                "prompt": ("STRING", {"multiline": False, "default": "Please provide a detailed description of this image."},),
+                "prompt": ("STRING", {"multiline": True, "default": "Please provide a detailed description of this image."},),
+                "separator": ("STRING", {"multiline": False, "default": r"\n"},),
                 "huggingface_model": (s.HUGGINGFACE_MODEL_NAMES, {"default": s.HUGGINGFACE_MODEL_NAMES[0]},),
                 "device": (s.DEVICES, {"default": s.DEVICES[0]},),
                 "trust_remote_code": ("BOOLEAN", {"default": False},),
@@ -42,8 +44,9 @@ class Moondream:
     OUTPUT_NODE = False
     CATEGORY = "Hangover"
 
-    def interrogate(self, image:torch.Tensor, prompt:str, huggingface_model:str, device:str, trust_remote_code:bool):
+    def interrogate(self, image:torch.Tensor, prompt:str, separator:str, huggingface_model:str, device:str, trust_remote_code:bool):
         dev = "cuda" if device.lower() == "gpu" else "cpu"
+
         if (self.model == None) or (self.tokenizer == None) or (self.modelname != huggingface_model) or (device != self.device):
             del self.model
             del self.tokenizer
@@ -64,12 +67,19 @@ class Moondream:
             self.device = device
 
         descriptions = ""
+        # prompts = [s.strip for s in list(filter(lambda x: x!="", prompt.splitlines()))] 
+        prompts = list(filter(lambda x: x!="", [s.lstrip() for s in prompt.splitlines()])) # make a prompt list and remove unnecessary whitechars and empty lines
         
         for im in image:
             i = 255. * im.cpu().numpy()
             img = Image.fromarray(np.clip(i, 0, 255).astype(np.uint8))
             enc_image = self.model.encode_image(img)
-            answer = self.model.answer_question(enc_image, prompt, self.tokenizer)
-            descriptions += answer
+            descr = ""
+            for p in prompts:
+                answer = self.model.answer_question(enc_image, p, self.tokenizer)
+                sep = codecs.decode(separator, 'unicode_escape')
+                descr += f"{answer}{sep}"
+            descriptions += f"{descr[0:-len(sep)]}\n"
         
+        # return(descriptions[0:-1],)
         return(descriptions,)
