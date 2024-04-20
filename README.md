@@ -15,6 +15,6 @@
 * End support for moondream1 in order to change the license for this repository to [Apache 2.0](https://choosealicense.com/licenses/apache-2.0/).
 * New multi prompt feature: Ask several questions at once. Just place each prompt on a new line. 🔄
 * Added model revision selector. 🔄
-* Added model temerature selector. Set this value to 0 to use the models default temperature. 🔄
+* Added model temperature selector. Set this value to 0 to use the models default temperature. 🔄
 
 ## To do
