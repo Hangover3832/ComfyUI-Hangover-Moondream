@@ -17,13 +17,15 @@ import numpy as np
 import codecs
 
 class Moondream:
-    HUGGINGFACE_MODEL_NAMES = ["vikhyatk/moondream2",] # other/newer models can be added here
+    HUGGINGFACE_MODEL_NAME = "vikhyatk/moondream2"
+    MODEL_REVISIONS = ["latest", "2024-03-06", "2024-03-13", "2024-04-02"]
     DEVICES = ["cpu", "gpu"] if torch.cuda.is_available() else  ["cpu"]
 
     def __init__(self):
         self.model = None
         self.tokenizer = None
-        self.modelname = ""
+        # self.modelname = ""
+        self.revision = None
 
     @classmethod
     def INPUT_TYPES(s):
@@ -32,7 +34,9 @@ class Moondream:
                 "image": ("IMAGE",),
                 "prompt": ("STRING", {"multiline": True, "default": "Please provide a detailed description of this image."},),
                 "separator": ("STRING", {"multiline": False, "default": r"\n"},),
-                "huggingface_model": (s.HUGGINGFACE_MODEL_NAMES, {"default": s.HUGGINGFACE_MODEL_NAMES[0]},),
+                # "huggingface_model": (s.HUGGINGFACE_MODEL_NAMES, {"default": s.HUGGINGFACE_MODEL_NAMES[-1]},),
+                "model_revision": (s.MODEL_REVISIONS, {"default": s.MODEL_REVISIONS[0]},),
+                "temperature": ("FLOAT", {"min": 0.0, "max": 1.0, "step": 0.01, "default": 0.},),
                 "device": (s.DEVICES, {"default": s.DEVICES[0]},),
                 "trust_remote_code": ("BOOLEAN", {"default": False},),
             }
@@ -44,10 +48,17 @@ class Moondream:
     OUTPUT_NODE = False
     CATEGORY = "Hangover"
 
-    def interrogate(self, image:torch.Tensor, prompt:str, separator:str, huggingface_model:str, device:str, trust_remote_code:bool):
+    def interrogate(self, image:torch.Tensor, prompt:str, separator:str, model_revision:str, temperature:float, device:str, trust_remote_code:bool):
+        if not trust_remote_code:
+            raise ValueError("You have to trust remote code to use this node!")
         dev = "cuda" if device.lower() == "gpu" else "cpu"
+        if temperature < 0.01:
+            temperature = None
+            do_sample = False
+        else:
+            do_sample = True
 
-        if (self.model == None) or (self.tokenizer == None) or (self.modelname != huggingface_model) or (device != self.device):
+        if (self.model == None) or (self.tokenizer == None) or (device != self.device) or (model_revision != self.revision):
             del self.model
             del self.tokenizer
             gc.collect()
@@ -55,15 +66,19 @@ class Moondream:
                 torch.cuda.empty_cache()
             self.model = None
             self.tokenizer = None
-            print(f"moondream: loading model {huggingface_model}, please stand by....")
-            try:
-                self.model = AutoModelForCausalLM.from_pretrained(huggingface_model, trust_remote_code=trust_remote_code).to(dev)
-            except ValueError:
-                print("Moondream: You have to trust remote code to use this node!")
-                return ("You have to trust remote code execution to use this node!",)
+            self.revision = model_revision
+
+            print(f"[Moondream] loading model moondream2 revision '{model_revision}', please stand by....")
+            if model_revision == Moondream.MODEL_REVISIONS[0]:
+                model_revision = None
+            self.model = AutoModelForCausalLM.from_pretrained(
+                Moondream.HUGGINGFACE_MODEL_NAME, 
+                trust_remote_code=trust_remote_code,
+                revision=model_revision
+            ).to(dev)
             
-            self.tokenizer = Tokenizer.from_pretrained(huggingface_model)
-            self.modelname = huggingface_model
+            self.tokenizer = Tokenizer.from_pretrained(Moondream.HUGGINGFACE_MODEL_NAME)
+            # self.modelname = huggingface_model
             self.device = device
 
         descriptions = ""
@@ -71,16 +86,18 @@ class Moondream:
         if len(prompts) == 0:
             prompts = [""]
         
-        for im in image:
-            i = 255. * im.cpu().numpy()
-            img = Image.fromarray(np.clip(i, 0, 255).astype(np.uint8))
-            enc_image = self.model.encode_image(img)
-            descr = ""
-            sep = codecs.decode(separator, 'unicode_escape')
-            for p in prompts:
-                answer = self.model.answer_question(enc_image, p, self.tokenizer)
-                descr += f"{answer}{sep}"
-            descriptions += f"{descr[0:-len(sep)]}\n"
+        try:
+            for im in image:
+                i = 255. * im.cpu().numpy()
+                img = Image.fromarray(np.clip(i, 0, 255).astype(np.uint8))
+                enc_image = self.model.encode_image(img)
+                descr = ""
+                sep = codecs.decode(separator, 'unicode_escape')
+                for p in prompts:
+                    answer = self.model.answer_question(enc_image, p, self.tokenizer, temperature=temperature, do_sample=do_sample)
+                    descr += f"{answer}{sep}"
+                descriptions += f"{descr[0:-len(sep)]}\n"
+        except RuntimeError:
+            raise ValueError(f"[Moondream] model revision {self.revision} is outdated. Please select a newer one.")
         
         return(descriptions[0:-1],)
-        # return(descriptions,)
