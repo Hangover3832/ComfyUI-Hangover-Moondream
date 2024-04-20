@@ -54,7 +54,7 @@ class Moondream:
         dev = "cuda" if device.lower() == "gpu" else "cpu"
         if temperature < 0.01:
             temperature = None
-            do_sample = False
+            do_sample = None
         else:
             do_sample = True
 
