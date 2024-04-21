@@ -9,22 +9,38 @@
 # by https://github.com/Hangover3832
 
 
-from transformers import AutoModelForCausalLM, CodeGenTokenizerFast as Tokenizer
+from transformers import AutoModelForCausalLM as AutoModel, CodeGenTokenizerFast as Tokenizer
 from PIL import Image
 import torch
 import gc
 import numpy as np
 import codecs
+import subprocess
+
+
+def Run_git_status(repo:str) -> list[str]:
+    """resturns a list of all model tag references for this huggingface repo"""
+    url = f"https://huggingface.co/{repo}"
+    process = subprocess.Popen(['git', 'ls-remote', url], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = process.communicate()
+    result = []
+    if process.returncode == 0:
+        revs = stdout.decode().splitlines()
+        revs = [r.replace('main', 'latest') for r in revs if ('/tags' in r) or ('/main' in r)]
+        for line in revs:
+            rev = line.split('\t')
+            result.append(f"{rev[-1].split('/')[-1]} -> {rev[0]}")
+    return result
 
 class Moondream:
     HUGGINGFACE_MODEL_NAME = "vikhyatk/moondream2"
-    MODEL_REVISIONS = ["latest", "2024-03-06", "2024-03-13", "2024-04-02"]
+    MODEL_REVISIONS = ["latest", "2024-03-04", "2024-03-06", "2024-03-13", "2024-04-02"]
     DEVICES = ["cpu", "gpu"] if torch.cuda.is_available() else  ["cpu"]
+
 
     def __init__(self):
         self.model = None
         self.tokenizer = None
-        # self.modelname = ""
         self.revision = None
 
     @classmethod
@@ -51,6 +67,17 @@ class Moondream:
     def interrogate(self, image:torch.Tensor, prompt:str, separator:str, model_revision:str, temperature:float, device:str, trust_remote_code:bool):
         if not trust_remote_code:
             raise ValueError("You have to trust remote code to use this node!")
+
+        if prompt == 'list_model_references':
+            try:
+                print('\033[92m\033[4m[Moondream] model revsion references:\033[0m\033[92m')
+                git_status = Run_git_status(Moondream.HUGGINGFACE_MODEL_NAME)
+                for s in git_status:
+                    print(s)
+                return ("",)
+            finally:
+                print('\033[0m')
+
         dev = "cuda" if device.lower() == "gpu" else "cpu"
         if temperature < 0.01:
             temperature = None
@@ -71,14 +98,18 @@ class Moondream:
             print(f"[Moondream] loading model moondream2 revision '{model_revision}', please stand by....")
             if model_revision == Moondream.MODEL_REVISIONS[0]:
                 model_revision = None
-            self.model = AutoModelForCausalLM.from_pretrained(
-                Moondream.HUGGINGFACE_MODEL_NAME, 
-                trust_remote_code=trust_remote_code,
-                revision=model_revision
-            ).to(dev)
-            
-            self.tokenizer = Tokenizer.from_pretrained(Moondream.HUGGINGFACE_MODEL_NAME)
-            # self.modelname = huggingface_model
+
+            try:
+                self.model = AutoModel.from_pretrained(
+                    Moondream.HUGGINGFACE_MODEL_NAME, 
+                    trust_remote_code=trust_remote_code,
+                    revision=model_revision
+                ).to(dev)
+                self.tokenizer = Tokenizer.from_pretrained(Moondream.HUGGINGFACE_MODEL_NAME)
+            except RuntimeError:
+                raise ValueError(f"[Moondream] Please check if the tramsformer package fulfills the requirements. "
+                                  "Also note that older models might not work anymore with newer packages.")
+
             self.device = device
 
         descriptions = ""
@@ -98,6 +129,7 @@ class Moondream:
                     descr += f"{answer}{sep}"
                 descriptions += f"{descr[0:-len(sep)]}\n"
         except RuntimeError:
-            raise ValueError(f"[Moondream] model revision {self.revision} is outdated. Please select a newer one.")
+            raise ValueError(f"[Moondream] Please check if the tramsformer package fulfills the requirements. "
+                                  "Also note that older models might not work anymore with newer packages.")
         
         return(descriptions[0:-1],)
