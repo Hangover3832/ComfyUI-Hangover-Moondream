@@ -16,7 +16,7 @@ import gc
 import numpy as np
 import codecs
 import subprocess
-
+import os
 
 def Run_git_status(repo:str) -> list[str]:
     """resturns a list of all model tag references for this huggingface repo"""
@@ -34,9 +34,14 @@ def Run_git_status(repo:str) -> list[str]:
 
 class Moondream:
     HUGGINGFACE_MODEL_NAME = "vikhyatk/moondream2"
-    MODEL_REVISIONS = ["latest", "2024-03-04", "2024-03-06", "2024-03-13", "2024-04-02"]
     DEVICES = ["cpu", "gpu"] if torch.cuda.is_available() else  ["cpu"]
+    Versions = 'versions.txt'
+    current_path = os.path.abspath(os.path.dirname(__file__))
+    with open(f"{current_path}/{Versions}", 'r') as f:
+        versions = f.read()
+    MODEL_REVISIONS = [v for v in versions.splitlines() if v.strip()]
 
+    print(f"[Moondream] found model versions: {', '.join(MODEL_REVISIONS)}")
 
     def __init__(self):
         self.model = None
