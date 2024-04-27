@@ -56,7 +56,7 @@ class Moondream:
                 "prompt": ("STRING", {"multiline": True, "default": "Please provide a detailed description of this image."},),
                 "separator": ("STRING", {"multiline": False, "default": r"\n"},),
                 # "huggingface_model": (s.HUGGINGFACE_MODEL_NAMES, {"default": s.HUGGINGFACE_MODEL_NAMES[-1]},),
-                "model_revision": (s.MODEL_REVISIONS, {"default": s.MODEL_REVISIONS[0]},),
+                "model_revision": (s.MODEL_REVISIONS, {"default": s.MODEL_REVISIONS[-1]},),
                 "temperature": ("FLOAT", {"min": 0.0, "max": 1.0, "step": 0.01, "default": 0.},),
                 "device": (s.DEVICES, {"default": s.DEVICES[0]},),
                 "trust_remote_code": ("BOOLEAN", {"default": False},),
