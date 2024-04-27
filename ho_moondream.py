@@ -17,6 +17,7 @@ import numpy as np
 import codecs
 import subprocess
 import os
+import requests
 
 def Run_git_status(repo:str) -> list[str]:
     """resturns a list of all model tag references for this huggingface repo"""
@@ -36,7 +37,22 @@ class Moondream:
     HUGGINGFACE_MODEL_NAME = "vikhyatk/moondream2"
     DEVICES = ["cpu", "gpu"] if torch.cuda.is_available() else  ["cpu"]
     Versions = 'versions.txt'
+    Model_Revisions_URL = f"https://huggingface.co/{HUGGINGFACE_MODEL_NAME}/raw/main/{Versions}"
     current_path = os.path.abspath(os.path.dirname(__file__))
+    try:
+        print("[Moondream] trying to update model versions...", end='')
+        response = requests.get(Model_Revisions_URL)
+        if response.status_code == 200:
+            with open(f"{current_path}/{Versions}", 'w') as f:
+                f.write(response.text)
+            print('ok')
+    except Exception as e:
+        if hasattr(e, 'message'):
+            msg = e.message
+        else:
+            msg = e
+        print(f'failed ({msg})')
+
     with open(f"{current_path}/{Versions}", 'r') as f:
         versions = f.read()
     MODEL_REVISIONS = [v for v in versions.splitlines() if v.strip()]
