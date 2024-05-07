@@ -117,8 +117,8 @@ class Moondream:
             self.revision = model_revision
 
             print(f"[Moondream] loading model moondream2 revision '{model_revision}', please stand by....")
-            if model_revision == Moondream.MODEL_REVISIONS[0]:
-                model_revision = None
+            # if model_revision == Moondream.MODEL_REVISIONS[0]:
+            #    model_revision = None
 
             try:
                 self.model = AutoModel.from_pretrained(
