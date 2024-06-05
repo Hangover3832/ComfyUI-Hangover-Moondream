@@ -16,7 +16,9 @@
 * New multi prompt feature: Ask several questions at once. Just place each prompt on a new line. 🔄
 * Added model revision selector. 🔄
 * Added model temperature selector. Set this value to 0 to use the models default temperature. 🔄
-* Now supporting custom model folder location for manually downloaded models 🔄. The following files are expected in ComfyUI/models/moondream2: 
+* Now supporting custom model folder location for manually downloaded models 🔄. \
+  ![alt text](images/custom_location.PNG) \
+  The following files are expected in ComfyUI/models/moondream2:
   - model.safetensors
   - config.json
   - tokenizer.json
