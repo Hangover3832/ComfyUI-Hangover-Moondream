@@ -1,0 +1,15 @@
+[project]
+name = "comfyui-hangover-moondream"
+description = "Moondream is a lightweight multimodal large language model.\n[w/WARN:Additional python code will be downloaded from huggingface and executed. You have to trust this creator if you want to use this node!]"
+version = "1.0.0"
+license = "LICENSE"
+dependencies = ["Pillow", "timm>=0.9.12", "accelerate>=0.25.0", "huggingface-hub", "transformers>=4.36.2", "einops>=0.7.0", "torch>=2.1.2", "torchvision>=0.16.2"]
+
+[project.urls]
+Repository = "https://github.com/Hangover3832/ComfyUI-Hangover-Moondream"
+#  Used by Comfy Registry https://comfyregistry.org
+
+[tool.comfy]
+PublisherId = ""
+DisplayName = "ComfyUI-Hangover-Moondream"
+Icon = ""
