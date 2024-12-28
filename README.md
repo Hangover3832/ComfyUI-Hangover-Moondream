@@ -28,5 +28,9 @@
   - modeling_phi.py
   - moondream.py
   - vision_encoder.py
+  - region_model.py 🔄
+  - fourier_features.py 🔄
+  - handler.py 🔄
+
 
 ## To do

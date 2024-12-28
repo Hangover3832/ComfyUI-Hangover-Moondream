@@ -2,7 +2,7 @@ Pillow
 timm>=0.9.12
 accelerate>=0.25.0
 huggingface-hub
-transformers>=4.36.2
+transformers>=4.44.0
 einops>=0.7.0
 torch>=2.1.2
 torchvision>=0.16.2
