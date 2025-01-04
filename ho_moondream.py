@@ -19,20 +19,23 @@ import subprocess
 import os
 import requests
 import json
+from huggingface_hub import list_repo_refs
 
-def Run_git_status(repo:str) -> list[str]:
-    """resturns a list of all model tag references for this huggingface repo"""
-    url: str = f"https://huggingface.co/{repo}"
-    process = subprocess.Popen(['git', 'ls-remote', url], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, stderr = process.communicate()
-    result = []
-    if process.returncode == 0:
-        revs = stdout.decode().splitlines()
-        revs = [r.replace('main', 'latest') for r in revs if ('/tags' in r) or ('/main' in r)]
-        for line in revs:
-            rev = line.split('\t')
-            result.append(f"{rev[-1].split('/')[-1]} -> {rev[0]}")
-    return result
+def Run_git_status(repo: str):
+    """Prints a list of all model tag references for this huggingface repo"""
+    
+    try:
+        print('\033[92m\033[4m[Moondream] model revsion references:\033[0m\033[92m')
+        refs = list_repo_refs(repo)
+        result = []
+        for tag in refs.tags:
+            if tag:
+                print(f"{tag.name} -> {tag.target_commit}")
+    except Exception as e:
+        print(f"Error fetching repository references: {e}")
+    finally:
+        print('\033[0m')
+
 
 class Moondream:
     HUGGINGFACE_MODEL_NAME: str = "vikhyatk/moondream2"
@@ -74,17 +77,7 @@ class Moondream:
     print(f"[Moondream] found model versions: {', '.join(MODEL_REVISIONS)}")
     MODEL_REVISIONS.insert(0,'ComfyUI/models/moondream2')
 
-    try:
-        print('\033[92m\033[4m[Moondream] model revsion references:\033[0m\033[92m')
-        git_status = Run_git_status(HUGGINGFACE_MODEL_NAME)
-        for s in git_status:
-            print(s)
-        # return ("",)
-    except:
-        pass
-    finally:
-        print('\033[0m')
-
+    # Run_git_status(HUGGINGFACE_MODEL_NAME)
 
     def __init__(self):
         self.model = None
