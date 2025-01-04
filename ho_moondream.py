@@ -18,10 +18,11 @@ import codecs
 import subprocess
 import os
 import requests
+import json
 
 def Run_git_status(repo:str) -> list[str]:
     """resturns a list of all model tag references for this huggingface repo"""
-    url = f"https://huggingface.co/{repo}"
+    url: str = f"https://huggingface.co/{repo}"
     process = subprocess.Popen(['git', 'ls-remote', url], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = process.communicate()
     result = []
@@ -34,10 +35,10 @@ def Run_git_status(repo:str) -> list[str]:
     return result
 
 class Moondream:
-    HUGGINGFACE_MODEL_NAME = "vikhyatk/moondream2"
-    DEVICES = ["cpu", "gpu"] if torch.cuda.is_available() else  ["cpu"]
-    Versions = 'versions.txt'
-    Model_Revisions_URL = f"https://huggingface.co/{HUGGINGFACE_MODEL_NAME}/raw/main/{Versions}"
+    HUGGINGFACE_MODEL_NAME: str = "vikhyatk/moondream2"
+    DEVICES: str = ["cpu", "gpu"] if torch.cuda.is_available() else  ["cpu"]
+    Versions: str = 'versions.txt'
+    Model_Revisions_URL: str = f"https://huggingface.co/{HUGGINGFACE_MODEL_NAME}/raw/main/{Versions}"
     current_path = os.path.abspath(os.path.dirname(__file__))
     try:
         print("[Moondream] trying to update model versions...", end='')
@@ -53,10 +54,23 @@ class Moondream:
             msg = e
         print(f'failed ({msg})')
 
+    # read the versions file
     with open(f"{current_path}/{Versions}", 'r') as f:
         versions = f.read()
+
+    # read the special names file
+    with open(f"{current_path}/special_names.json") as f:
+        special_names: json = json.load(f)
     
-    MODEL_REVISIONS = [v for v in versions.splitlines() if v.strip()]
+    # build the model revisions list and apply special names
+    MODEL_REVISIONS: list[str] = [] # [v for v in versions.splitlines() if v.strip()]
+    for v in versions.splitlines():
+        if v.strip():
+            if v in special_names:
+                MODEL_REVISIONS.append(f"{v} ({special_names[v]})")
+            else:
+                MODEL_REVISIONS.append(v)
+
     print(f"[Moondream] found model versions: {', '.join(MODEL_REVISIONS)}")
     MODEL_REVISIONS.insert(0,'ComfyUI/models/moondream2')
 
@@ -102,6 +116,7 @@ class Moondream:
         if not trust_remote_code:
             raise ValueError("You have to trust remote code to use this node!")
 
+        model_revision = model_revision[:10]
         dev = "cuda" if device.lower() == "gpu" else "cpu"
         if temperature < 0.01:
             temperature = None
