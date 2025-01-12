@@ -6,3 +6,4 @@ transformers>=4.44.0
 einops>=0.7.0
 torch>=2.1.2
 torchvision>=0.16.2
+pyvips

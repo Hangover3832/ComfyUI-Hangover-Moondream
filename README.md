@@ -37,5 +37,6 @@ Very impressive OCR capabilities in the 'Thundermoon' edition (version 2024-07-2
   - fourier_features.py 🔄
   - handler.py 🔄
 * Handling  information for special model names 🔄
+* The new models from 2025 needs the binaries from the [libvip](https://github.com/libvips/build-win64-mxe/releases) package in the search path of your OS. https://github.com/libvips/build-win64-mxe/releases/download/v8.16.0/vips-dev-w64-web-8.16.0-static.zip for Windows. Alternatively you can put "libvips-42.dll" from this package into the ComfyUI_windows_portable root folder.
 
 ## To do
