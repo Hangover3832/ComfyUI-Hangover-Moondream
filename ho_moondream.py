@@ -109,7 +109,6 @@ class Moondream:
         if not trust_remote_code:
             raise ValueError("You have to trust remote code to use this node!")
 
-        model_revision = model_revision[:10]
         dev = "cuda" if device.lower() == "gpu" else "cpu"
         if temperature < 0.01:
             temperature = None
@@ -129,10 +128,13 @@ class Moondream:
 
             print(f"[Moondream] loading model moondream2 revision '{model_revision}', please stand by....")
             if model_revision == Moondream.MODEL_REVISIONS[0]:
+                # using manually downloaded model
                 model_name = model_revision
                 model_revision = None
             else:
+                # using huggingface model
                 model_name = Moondream.HUGGINGFACE_MODEL_NAME
+                model_revision = model_revision[:10]
 
             try:
                 self.model = AutoModel.from_pretrained(
@@ -144,6 +146,8 @@ class Moondream:
             except RuntimeError:
                 raise ValueError(f"[Moondream] Please check if the tramsformer package fulfills the requirements. "
                                   "Also note that older models might not work anymore with newer packages.")
+            except FileNotFoundError:
+                raise NotImplementedError(f"Error: Please note: manually downloaded local models revision 2025 is currently not supported by this node.")
 
             self.device = device
 
