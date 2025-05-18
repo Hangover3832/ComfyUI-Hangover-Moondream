@@ -1,5 +1,7 @@
 # ConfyUI-Hangover-Moondream
 
+## This repository will no longer be maintained.
+
 [Moondream](https://huggingface.co/vikhyatk/moondream2) is a lightweight multimodal large languge model.
 
 ⚠️ **WARNING: Additional python code will be downloaded from huggingface and executed. You have to trust this creator if you want to use this node!**
